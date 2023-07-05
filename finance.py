@@ -43,24 +43,24 @@ def obter_dados_ticker(ticker, data_inicio, data_fim):
 
     # Imprimindo valores diários em dólar
     for i, valor in enumerate(valores_dolar):
-        print(f"Data: {dados.index[i].date().strftime('%d/%m/%Y')}, Valor: {valor:.4f}")
+        print(f"Data: {dados.index[i].date().strftime('%d/%m/%Y')}, Valor: {valor:.4f} USD")
 
     # Calculando o valor médio em dólar
     valor_medio = sum(valores_dolar) / len(valores_dolar)
     print("\n-----------------------------------------------------------------------------------------")
     print("Maior Valor:")
-    print(f"{valor_maximo:.4f} Dólares.")
-    print(f"{valor_maximo * dolar_atual:.4f} Reais.")
+    print(f"{valor_maximo:.2f} USD.")
+    print(f"{valor_maximo * dolar_atual:.2f} BRL.")
     print(f"Data: {data_max.strftime('%d/%m/%Y')}")
     print("\n-----------------------------------------------------------------------------------------")
     print("Menor Valor:")
-    print(f"{valor_minimo:.4f} Dólares.")
-    print(f"{valor_minimo * dolar_atual:.4f} Reais.")
+    print(f"{valor_minimo:.2f} USD.")
+    print(f"{valor_minimo * dolar_atual:.2f} BRL.")
     print(f"Data: {data_min.strftime('%d/%m/%Y')}")
     print("\n-----------------------------------------------------------------------------------------")
     print("Valor Médio:")
-    print(f"{valor_medio:.4f} Dólares.")
-    print(f"{valor_medio * dolar_atual:.4f} Reais.")
+    print(f"{valor_medio:.2f} USD.")
+    print(f"{valor_medio * dolar_atual:.2f} BRL.")
     print("\n-----------------------------------------------------------------------------------------")
 
 # Solicitar entrada do usuário
