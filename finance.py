@@ -43,7 +43,7 @@ def obter_dados_ticker(ticker, data_inicio, data_fim):
 
     # Imprimindo valores diários em dólar
     for i, valor in enumerate(valores_dolar):
-        print(f"Data: {dados.index[i].date().strftime('%d/%m/%Y')}, Valor: {valor:.4f} USD")
+        print(f"Data: {dados.index[i].date().strftime('%d/%m/%Y')}, Valor: {valor:.2f} USD")
 
     # Calculando o valor médio em dólar
     valor_medio = sum(valores_dolar) / len(valores_dolar)
