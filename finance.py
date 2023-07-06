@@ -1,31 +1,18 @@
 import yfinance as yf
-from forex_python.converter import CurrencyRates
-from datetime import datetime
-import numpy as np
+from datetime import datetime, date
 
-def obter_dados_ticker(ticker, data_inicio, data_fim):
+def obter_dados_ticker(ticker, dt_inicio, dt_fim):
     # Convertendo a data para o formato desejado
-    data_inicio = datetime.strptime(data_inicio, '%d/%m/%Y')
-    data_fim = datetime.strptime(data_fim, '%d/%m/%Y')
-
-    if data_inicio > datetime.now() or data_fim > datetime.now():
-        raise ValueError("A data de início ou fim não pode ser maior do que a data de hoje.")
+    data_inicio = datetime.strptime(dt_inicio, '%d/%m/%Y')
+    data_fim = datetime.strptime(dt_fim, '%d/%m/%Y')
 
     # Convertendo a data para o formato desejado
     data_inicio_str = data_inicio.strftime('%Y-%m-%d')
     data_fim_str = data_fim.strftime('%Y-%m-%d')
 
     # Obter dados históricos do ticker
-    dados = yf.download(ticker, start=data_inicio_str, end=data_fim_str)
+    dados = yf.download(ticker, start=data_inicio_str, end=data_fim_str, progress=False)
 
-    # Converter o valor da moeda
-    cr = CurrencyRates()
-    dolar_atual = cr.get_rate('USD', 'BRL')
-
-    valor_maximo = 0
-    valor_minimo = np.inf
-    data_max = None
-    data_min = None
     valores_dolar = []
 
     # Processar valores diários
@@ -33,40 +20,46 @@ def obter_dados_ticker(ticker, data_inicio, data_fim):
         valor_dolar = row['Close']
         valores_dolar.append(valor_dolar)
 
-        # Atualizando valor máximo e mínimo
-        if valor_dolar > valor_maximo:
-            valor_maximo = valor_dolar
-            data_max = index.date()
-        if valor_dolar < valor_minimo:
-            valor_minimo = valor_dolar
-            data_min = index.date()
-
-    # Imprimindo valores diários em dólar
-    for i, valor in enumerate(valores_dolar):
-        print(f"Data: {dados.index[i].date().strftime('%d/%m/%Y')}, Valor: {valor:.2f} USD")
-
     # Calculando o valor médio em dólar
     valor_medio = sum(valores_dolar) / len(valores_dolar)
-    print("\n-----------------------------------------------------------------------------------------")
-    print("Maior Valor:")
-    print(f"{valor_maximo:.2f} USD.")
-    print(f"{valor_maximo * dolar_atual:.2f} BRL.")
-    print(f"Data: {data_max.strftime('%d/%m/%Y')}")
-    print("\n-----------------------------------------------------------------------------------------")
-    print("Menor Valor:")
-    print(f"{valor_minimo:.2f} USD.")
-    print(f"{valor_minimo * dolar_atual:.2f} BRL.")
-    print(f"Data: {data_min.strftime('%d/%m/%Y')}")
-    print("\n-----------------------------------------------------------------------------------------")
-    print("Valor Médio:")
-    print(f"{valor_medio:.2f} USD.")
-    print(f"{valor_medio * dolar_atual:.2f} BRL.")
-    print("\n-----------------------------------------------------------------------------------------")
+    
+    return valor_medio
 
-# Solicitar entrada do usuário
-ticker = input("Digite o nome do ticker: ")
-data_inicio = input("Digite a data de início (DD/MM/AAAA): ")
-data_fim = input("Digite a data final (DD/MM/AAAA): ")
+def ler_valores_arquivo(nome_arquivo):
+    with open(nome_arquivo, 'r') as arquivo:
+        linhas = arquivo.readlines()
 
-# Obter e imprimir dados do ticker
-obter_dados_ticker(ticker, data_inicio, data_fim)
+    valores_ticker = []
+    for linha in linhas:
+        valores = linha.strip().split(" - ")
+        if len(valores) >= 2:
+            ticker = valores[0]
+            dt_inicio = valores[1]
+            dt_fim = valores[2] if len(valores) >= 3 else date.today().strftime('%d/%m/%Y')
+            valores_ticker.append((ticker, dt_inicio, dt_fim))
+
+    return valores_ticker
+
+def salvar_valores_arquivo(valores_ticker, nome_arquivo):
+    with open(nome_arquivo, 'w') as arquivo:
+        for ticker, valor_medio in valores_ticker:
+            linha = f"{ticker} - {valor_medio:.2f}\n"
+            arquivo.write(linha)
+
+# Nome do arquivo de entrada
+nome_arquivo_entrada = "tickers.txt"
+
+# Nome do arquivo de saída
+nome_arquivo_saida = "papeis.txt"
+
+# Ler os valores do arquivo de entrada
+valores_ticker = ler_valores_arquivo(nome_arquivo_entrada)
+
+# Processar os valores dos tickers
+valores_processados = []
+for ticker, dt_inicio, dt_fim in valores_ticker:
+    valor_medio = obter_dados_ticker(ticker, dt_inicio, dt_fim)
+    valores_processados.append((ticker, valor_medio))
+
+# Salvar os valores processados no arquivo de saída
+salvar_valores_arquivo(valores_processados, nome_arquivo_saida)
